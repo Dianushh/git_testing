@@ -1,26 +1,35 @@
-name: Python-Check-Workflow
+name: Python-CI-CD-Workflow
 
-# 1. Когда запускать? При каждом пуше в ветку main
 on:
   push:
     branches: [ "main" ]
 
-# 2. Что именно делать?
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest # Запускаем на чистой Linux-машине
-
+  # Первая задача: Тестирование (уже знакомо)
+  test-logic:
+    runs-on: ubuntu-latest
     steps:
-      - name: Копируем код в облако
-        uses: actions/checkout@v4
-
-      - name: Устанавливаем Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+      - run: pip install pytest
+      - run: pytest test_app.py
 
-      - name: Устанавливаем зависимости
-        run: pip install pytest
-
-      - name: Запускаем тесты
-        run: pytest test_app.py
+  # Вторая задача: Сборка (CD часть)
+  build-and-publish:
+    needs: test-logic # Эта задача начнется ТОЛЬКО если тесты прошли успешно!
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Создаем архив с нашим приложением
+      - name: Create Deployment Package
+        run: tar -cvf app-package.tar app.py
+        
+      # Сохраняем этот архив в GitHub, чтобы его можно было скачать
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-ready-app
+          path: app-package.tar
