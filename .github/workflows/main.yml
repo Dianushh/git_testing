@@ -1,11 +1,8 @@
 name: Python-CI-CD-Workflow
 
-on:
-  push:
-    branches: [push]
+on: [push] # Это значит запускать на ЛЮБОЙ пуш в ЛЮБУЮ ветку
 
 jobs:
-  # Первая задача: Тестирование (уже знакомо)
   test-logic:
     runs-on: ubuntu-latest
     steps:
